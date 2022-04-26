@@ -16,7 +16,7 @@ func PunchNeededList() [][]byte {
 	var students []Student = make([]Student, 6)
 	var list [][]byte = make([][]byte, 6)
 	//在这里填入一宿舍6个懒蛋的学号密码
-	students[0] = Student{User_account: "181203501", User_password: "316919"}
+	students[0] = Student{User_account: "111111111", User_password: "123456"}
 	for i := 0; i < 6; i++ {
 		if students[i].User_account == "" {
 			break
