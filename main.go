@@ -35,12 +35,13 @@ func main() {
 		for {
 			v, ok := <-ch
 			if !ok {
+				log.Println("[+] 打卡完成!")
 				return
 			}
 			success, JSESSIONID, nginx := DoLogin(v)
 			err := json.Unmarshal(v, &student)
 			if err != nil {
-				log.Println("[+] 打卡完成!")
+
 				return
 			}
 			if !success {
