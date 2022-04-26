@@ -40,6 +40,7 @@ func main() {
 			success, JSESSIONID, nginx := DoLogin(v)
 			err := json.Unmarshal(v, &student)
 			if err != nil {
+				log.Println("[+] 打卡完成!")
 				return
 			}
 			if !success {
@@ -66,5 +67,5 @@ func main() {
 		}
 	}
 	close(ch)
-
+	time.Sleep(10 * time.Second)
 }
