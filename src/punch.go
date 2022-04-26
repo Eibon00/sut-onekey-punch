@@ -8,13 +8,6 @@ import (
 	"time"
 )
 
-// url: /getPunchForm
-// send: {date:"2022-4-26"}
-// reply: getPunchForm.json
-// url: /punchForm
-// send: PunchForm.json
-// reply: {"code":200,"msg":"success","datas":""}
-
 const YYYYMMDD = "2006-01-02"
 
 type Reply struct {

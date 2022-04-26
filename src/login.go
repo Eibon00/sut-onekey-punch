@@ -10,10 +10,6 @@ import (
 	"net/http"
 )
 
-// https://yqtb.sut.edu.cn/login
-// method:POST
-// {user_account:"181203501",user_password:"316919"}
-
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type Student struct {
