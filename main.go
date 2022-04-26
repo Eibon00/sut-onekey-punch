@@ -29,6 +29,32 @@ func PunchNeededList() [][]byte {
 func main() {
 	log.Println("[+] 开始打卡")
 	ch := make(chan []byte, 6)
+
+	go func() {
+		var student Student
+		for {
+			v, ok := <-ch
+			if !ok {
+				return
+			}
+			success, JSESSIONID, nginx := DoLogin(v)
+			err := json.Unmarshal(v, &student)
+			if err != nil {
+				return
+			}
+			if !success {
+				log.Printf("[-] WARNING! 倒霉蛋%s登陆失败!", student.User_account)
+				return
+			}
+			if !OnePunch(GetPunchForm(JSESSIONID, nginx), JSESSIONID, nginx) {
+				log.Printf("[-] WARNING! 倒霉蛋%s打卡失败!", student.User_account)
+				return
+			}
+			log.Printf("[+] %s 打卡成功!", student.User_account)
+		}
+
+	}()
+
 	for k, v := range PunchNeededList() {
 		if v == nil {
 			log.Printf("[-] data in list[%d] is empty,ignore...", k)
@@ -41,25 +67,4 @@ func main() {
 	}
 	close(ch)
 
-	go func() {
-		for {
-			v, ok := <-ch
-			if !ok {
-				return
-			}
-			success, JSESSIONID, nginx := DoLogin(v)
-			var student Student
-			err := json.Unmarshal(v, &student)
-			if err != nil {
-				return
-			}
-			if !success {
-				log.Printf("[-] WARNING! 倒霉蛋%s登陆失败!", student.User_account)
-			}
-			if !OnePunch(GetPunchForm(JSESSIONID, nginx), JSESSIONID, nginx) {
-				log.Printf("[-] WARNING! 倒霉蛋%s打卡失败!", student.User_account)
-			}
-		}
-
-	}()
 }
