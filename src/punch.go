@@ -2,6 +2,7 @@ package src
 
 import (
 	"bytes"
+	"crypto/tls"
 	"io"
 	"io/ioutil"
 	"log"
@@ -40,23 +41,20 @@ type today struct {
 func GetPunchForm(JSESSIONID *http.Cookie, nginx *http.Cookie) []Field {
 	url := "https://yqtb.sut.edu.cn/getPunchForm"
 	var currentDate today
+	var reply Reply
 	currentDate.Date = time.Now().UTC().Format(YYYYMMDD)
 	//工大传统艺能今天打明天的卡,所以获取昨天的打卡记录其实是获取今天的，真的ybb
 	DateJson, err := json.Marshal(currentDate)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	if err != nil {
-		log.Fatal(err)
-	}
-	var reply Reply
 	reader := bytes.NewReader(DateJson)
-	req, err := http.NewRequest("POST", url, reader)
-	if err != nil {
-		log.Fatal(err)
-	}
+	req, _ := http.NewRequest("POST", url, reader)
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-
+			log.Fatal(err)
 		}
 	}(req.Body)
 
@@ -65,16 +63,17 @@ func GetPunchForm(JSESSIONID *http.Cookie, nginx *http.Cookie) []Field {
 	req.AddCookie(JSESSIONID)
 	req.AddCookie(nginx)
 
-	c := http.Client{}
-	resp, err := c.Do(req)
-	if err != nil {
-		log.Fatal(err)
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
+	c := &http.Client{Transport: tr}
+	resp, _ := c.Do(req)
+
 	respBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Fatal(err)
 	}
-	//log.Println(string(respBytes))
+
 	err = json.Unmarshal(respBytes, &reply)
 	return reply.Datas.Fields
 }
@@ -87,7 +86,7 @@ func OnePunch(fields []Field, JSESSIONID *http.Cookie, nginx *http.Cookie) bool 
 		punch Punch
 		reply Reply
 	)
-	//jsonBytes, _ := json.Marshal(fields)
+
 	//创建响应体map
 	punchMap := make(map[string]string)
 	for _, v := range fields {
@@ -117,10 +116,13 @@ func OnePunch(fields []Field, JSESSIONID *http.Cookie, nginx *http.Cookie) bool 
 	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36")
 	req.AddCookie(JSESSIONID)
 	req.AddCookie(nginx)
-	c := http.Client{}
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	c := &http.Client{Transport: tr}
 	resp, err := c.Do(req)
 	if err != nil {
-		log.Fatal()
+		log.Fatal(err)
 	}
 	respBytes, _ := ioutil.ReadAll(resp.Body)
 	err = json.Unmarshal(respBytes, &reply)

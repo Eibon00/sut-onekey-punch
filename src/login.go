@@ -2,6 +2,7 @@ package src
 
 import (
 	"bytes"
+	"crypto/tls"
 	"fmt"
 	jsoniter "github.com/json-iterator/go"
 	"io"
@@ -25,7 +26,11 @@ type loginReply struct {
 
 func initCookies(url string) (*http.Cookie, *http.Cookie) {
 	var JSESSIONID, nginx *http.Cookie
-	resp, _ := http.Get(url)
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, //解决部分Linux操作系统上由于无法验证证书导致的panic
+	}
+	client := &http.Client{Transport: tr}
+	resp, _ := client.Get(url)
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
@@ -33,17 +38,6 @@ func initCookies(url string) (*http.Cookie, *http.Cookie) {
 		}
 	}(resp.Body)
 
-	// for k, v := range resp.Header {
-	// 	if k == "Set-Cookie" {
-	// 		for key, value := range v {
-	// 			if key != 0 {
-	// 				nginx = value
-	// 			} else {
-	// 				JSESSIONID = value
-	// 			}
-	// 		}
-	// 	}
-	// }
 	for k, v := range resp.Cookies() {
 		if k != 0 {
 			nginx = v
@@ -56,20 +50,23 @@ func initCookies(url string) (*http.Cookie, *http.Cookie) {
 
 func DoLogin(jsonByte []byte) (bool, *http.Cookie, *http.Cookie) {
 	url := "https://yqtb.sut.edu.cn"
-	JSESSIONID, nginx := initCookies(url)
+	JSESSIONID, nginx := initCookies(url) //初始化cookies
 
 	url = fmt.Sprintf("%s/login", url)
 	var reply loginReply
 
+	//直接修改默认http客户端,好孩子不要学
+	//http.DefaultClient.Transport = &http.Transport{
+	//	TLSClientConfig: &tls.Config{
+	//		InsecureSkipVerify: true,
+	//	},
+	//}
 	reader := bytes.NewReader(jsonByte)
-	req, err := http.NewRequest("POST", url, reader) //搞个新请求来
-	if err != nil {
-		log.Fatal(err)
-	}
+	req, _ := http.NewRequest("POST", url, reader) //只要我不做异常处理,就是没有异常(确信
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-
+			log.Println(err)
 		}
 	}(req.Body)
 
@@ -77,11 +74,11 @@ func DoLogin(jsonByte []byte) (bool, *http.Cookie, *http.Cookie) {
 	req.AddCookie(JSESSIONID)
 	req.AddCookie(nginx)
 
-	c := http.Client{}
-	resp, err := c.Do(req)
-	if err != nil {
-		log.Fatal(err)
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
+	c := &http.Client{Transport: tr}
+	resp, _ := c.Do(req)
 	respBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Fatal(err)
