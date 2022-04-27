@@ -2,6 +2,7 @@ package src
 
 import (
 	"bytes"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -53,7 +54,12 @@ func GetPunchForm(JSESSIONID *http.Cookie, nginx *http.Cookie) []Field {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer req.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+
+		}
+	}(req.Body)
 
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36")
@@ -101,7 +107,12 @@ func OnePunch(fields []Field, JSESSIONID *http.Cookie, nginx *http.Cookie) bool 
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer req.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+
+		}
+	}(req.Body)
 
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36")

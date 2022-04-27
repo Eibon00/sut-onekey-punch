@@ -13,20 +13,14 @@ import (
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type Student struct {
-	User_account  string `json:"user_account"`
-	User_password string `json:"user_password"`
+	UserAccount  string `json:"user_account"`
+	UserPassword string `json:"user_password"`
 }
 
-type login_reply struct {
+type loginReply struct {
 	Code  int    `json:"code"`
 	Msg   string `json:"msg"`
 	Datas string `json:"datas"`
-}
-
-func loadStudentData(StudentBytes []byte) Student {
-	var student Student
-	_ = json.Unmarshal(StudentBytes, &student)
-	return student
 }
 
 func initCookies(url string) (*http.Cookie, *http.Cookie) {
@@ -65,14 +59,19 @@ func DoLogin(jsonByte []byte) (bool, *http.Cookie, *http.Cookie) {
 	JSESSIONID, nginx := initCookies(url)
 
 	url = fmt.Sprintf("%s/login", url)
-	var reply login_reply
+	var reply loginReply
 
 	reader := bytes.NewReader(jsonByte)
 	req, err := http.NewRequest("POST", url, reader) //搞个新请求来
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer req.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+
+		}
+	}(req.Body)
 
 	req.Header.Set("Content-Type", "application/json")
 	req.AddCookie(JSESSIONID)

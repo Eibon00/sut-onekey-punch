@@ -16,9 +16,9 @@ func PunchNeededList() [][]byte {
 	var students []Student = make([]Student, 6)
 	var list [][]byte = make([][]byte, 6)
 	//在这里填入一宿舍6个懒蛋的学号密码
-	students[0] = Student{User_account: "111111111", User_password: "123456"}
+	students[0] = Student{UserAccount: "111111111", UserPassword: "123456"}
 	for i := 0; i < 6; i++ {
-		if students[i].User_account == "" {
+		if students[i].UserAccount == "" {
 			break
 		}
 		list[i], _ = json.Marshal(students[i])
@@ -44,15 +44,16 @@ func main() {
 
 				return
 			}
+
 			if !success {
-				log.Printf("[-] WARNING! 倒霉蛋%s登陆失败!", student.User_account)
-				return
+				log.Printf("[-] WARNING! 倒霉蛋%s登陆失败!", student.UserAccount)
 			}
+
 			if !OnePunch(GetPunchForm(JSESSIONID, nginx), JSESSIONID, nginx) {
-				log.Printf("[-] WARNING! 倒霉蛋%s打卡失败!", student.User_account)
-				return
+				log.Printf("[-] WARNING! 倒霉蛋%s打卡失败!", student.UserAccount)
+			} else {
+				log.Printf("[+] %s 打卡成功!", student.UserAccount)
 			}
-			log.Printf("[+] %s 打卡成功!", student.User_account)
 		}
 
 	}()
