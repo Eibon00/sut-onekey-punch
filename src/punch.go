@@ -40,7 +40,7 @@ type today struct {
 func GetPunchForm(JSESSIONID *http.Cookie, nginx *http.Cookie) []Field {
 	url := "https://yqtb.sut.edu.cn/getPunchForm"
 	var currentDate today
-	currentDate.Date = time.Now().Add(time.Hour * 24).UTC().Format(YYYYMMDD)
+	currentDate.Date = time.Now().UTC().Format(YYYYMMDD)
 	//工大传统艺能今天打明天的卡，真的ybb
 	DateJson, err := json.Marshal(currentDate)
 
