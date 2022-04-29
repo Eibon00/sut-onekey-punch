@@ -8,7 +8,6 @@
 
 ## 使用方法1：
 
-***
 登录自己的服务器（或PC\软路由\电视机顶盒等支持golang的设备）, 输入
 > $ git clone https://github.com/Eibon00/sut-onekey-punch.git
 
@@ -29,7 +28,6 @@ students[0] = Student{User_account: "111111111", User_password: "123456"}
 
 ## 使用方法2：
 
-* * *
 **1.下载对应架构编译好的可执行文件**
 
 **2.修改punch.json,并放在与可执行文件相同目录下**
@@ -59,7 +57,6 @@ students[0] = Student{User_account: "111111111", User_password: "123456"}
 
 ## 添加为定时运行
 
-* * *
 > $ crontab -e
 
 #### 按`i`输入
