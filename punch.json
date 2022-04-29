@@ -1,0 +1,28 @@
+{
+  "students": [
+    {
+      "user_account": "111111111",
+      "user_password": "111111"
+    },
+    {
+      "user_account": "222222222",
+      "user_password": "222222"
+    },
+    {
+      "user_account": "333333333",
+      "user_password": "333333"
+    },
+    {
+      "user_account": "114514191",
+      "user_password": "191981"
+    },
+    {
+      "user_account": "555555555",
+      "user_password": "555555"
+    },
+    {
+      "user_account": "666666666",
+      "user_password": "666666"
+    }
+  ]
+}

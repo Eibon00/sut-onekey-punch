@@ -2,9 +2,16 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	. "gd-one-punch/src"
+	"io/fs"
+	"io/ioutil"
 	"log"
 	"math/rand"
+	"os"
+	"path/filepath"
+	"runtime"
 	"time"
 )
 
@@ -12,16 +19,49 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
+const punchFileName = "punch.json"
+
+func GetRootPath() string {
+	_, b, _, _ := runtime.Caller(0)
+	return filepath.Join(filepath.Dir(b), "../")
+}
+
+func FileExists(filepath string) bool {
+	stat, err := os.Stat(filepath)
+	if errors.Is(err, fs.ErrNotExist) {
+		return false
+	}
+	return !stat.IsDir()
+}
+
 func PunchNeededList() [][]byte {
-	var students []Student = make([]Student, 6)
-	var list [][]byte = make([][]byte, 6)
-	//在这里填入一宿舍6个懒蛋的学号密码
-	students[0] = Student{UserAccount: "111111111", UserPassword: "123456"}
-	for i := 0; i < 6; i++ {
-		if students[i].UserAccount == "" {
-			break
+
+	var list [][]byte
+	punchFile := fmt.Sprintf("%s/%s", GetRootPath(), punchFileName)
+	if FileExists(punchFile) {
+		var punchConfig PunchFile
+
+		jsonBytes, err := ioutil.ReadFile(punchFile)
+		if err != nil {
+			log.Fatal(err)
 		}
-		list[i], _ = json.Marshal(students[i])
+		err = json.Unmarshal(jsonBytes, &punchConfig)
+		for _, v := range punchConfig.Students {
+			studentByte, _ := json.Marshal(v)
+			list = append(list, studentByte)
+		}
+	} else {
+		//在这里填入一宿舍6个懒蛋的学号密码
+		var students []Student = make([]Student, 6)
+		students[0] = Student{UserAccount: "111111111", UserPassword: "114514"}
+		students[1] = Student{UserAccount: "222222222", UserPassword: "191981"}
+		for i := 0; i < 6; i++ {
+			if students[i].UserAccount == "" {
+				break
+			}
+			studentByte, _ := json.Marshal(students[i])
+			list = append(list, studentByte)
+		}
 	}
 	return list
 }

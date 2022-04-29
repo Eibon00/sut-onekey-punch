@@ -13,6 +13,10 @@ import (
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
+type PunchFile struct {
+	Students []Student
+}
+
 type Student struct {
 	UserAccount  string `json:"user_account"`
 	UserPassword string `json:"user_password"`
