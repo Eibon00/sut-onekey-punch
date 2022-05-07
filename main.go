@@ -10,8 +10,10 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"path"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"time"
 )
 
@@ -19,11 +21,31 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
-const punchFileName = "punch.json"
+func getCurrentAbPath() string {
+	dir := getCurrentAbPathByExecutable()
+	tmpDir, _ := filepath.EvalSymlinks(os.TempDir())
+	if strings.Contains(dir, tmpDir) {
+		return getCurrentAbPathByCaller()
+	}
+	return dir
+}
 
-func GetRootPath() string {
-	_, b, _, _ := runtime.Caller(0)
-	return filepath.Join(filepath.Dir(b), "../")
+func getCurrentAbPathByExecutable() string {
+	exePath, err := os.Executable()
+	if err != nil {
+		log.Fatal(err)
+	}
+	res, _ := filepath.EvalSymlinks(filepath.Dir(exePath))
+	return res
+}
+
+func getCurrentAbPathByCaller() string {
+	var abPath string
+	_, filename, _, ok := runtime.Caller(0)
+	if ok {
+		abPath = path.Dir(filename)
+	}
+	return abPath
 }
 
 func FileExists(filepath string) bool {
@@ -37,8 +59,9 @@ func FileExists(filepath string) bool {
 func PunchNeededList() [][]byte {
 
 	var list [][]byte
-	punchFile := fmt.Sprintf("%s/%s", GetRootPath(), punchFileName)
+	punchFile := fmt.Sprintf("%s/%s", getCurrentAbPath(), "punch.json")
 	if FileExists(punchFile) {
+		log.Println("[+] 配置文件存在,使用配置文件")
 		var punchConfig PunchFile
 
 		jsonBytes, err := ioutil.ReadFile(punchFile)
@@ -52,6 +75,8 @@ func PunchNeededList() [][]byte {
 		}
 	} else {
 		//在这里填入一宿舍6个懒蛋的学号密码
+		log.Println("[-] 配置文件不存在")
+		log.Println("[+] 使用内置结构体")
 		var students []Student = make([]Student, 6)
 		students[0] = Student{UserAccount: "111111111", UserPassword: "114514"}
 		students[1] = Student{UserAccount: "222222222", UserPassword: "191981"}
@@ -104,7 +129,7 @@ func main() {
 		} else {
 			//每隔5~10分钟塞一个参数进来
 			latency := rand.Intn(5) + 5
-			time.Sleep(time.Duration(latency) * time.Minute)
+			time.Sleep(time.Duration(latency) * time.Second)
 			ch <- v
 		}
 	}
